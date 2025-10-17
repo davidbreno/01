@@ -1,0 +1,213 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = env("DATABASE_PROVIDER")
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String           @id @default(cuid())
+  name          String?
+  email         String?          @unique
+  emailVerified DateTime?
+  image         String?
+  hashedPassword String?
+  accounts      Account[]
+  sessions      Session[]
+  transactions  Transaction[]
+  categories    Category[]
+  bills         Bill[]
+  weightLogs    WeightLog[]
+  waterLogs     WaterLog[]
+  steroidCycles SteroidCycle[]
+  examFiles     ExamFile[]
+  exportJobs    ExportJob[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?  @map("refreshToken")
+  access_token      String?  @map("accessToken")
+  expires_at        Int?     @map("expiresAt")
+  token_type        String?  @map("tokenType")
+  scope             String?
+  id_token          String?  @map("idToken")
+  session_state     String?
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Category {
+  id      String   @id @default(cuid())
+  userId  String
+  name    String
+  kind    CategoryKind
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@index([userId, kind])
+  @@unique([userId, name], map: "userId_name")
+}
+
+enum CategoryKind {
+  IN
+  OUT
+}
+
+model Transaction {
+  id         String        @id @default(cuid())
+  userId     String
+  type       TransactionType
+  amount     Decimal       @db.Decimal(10, 2)
+  categoryId String
+  date       DateTime
+  note       String?
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category   Category      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type, date])
+}
+
+enum TransactionType {
+  IN
+  OUT
+}
+
+model Bill {
+  id      String    @id @default(cuid())
+  userId  String
+  title   String
+  amount  Decimal   @db.Decimal(10, 2)
+  dueDate DateTime
+  status  BillStatus
+  user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status, dueDate])
+}
+
+enum BillStatus {
+  PENDING
+  PAID
+}
+
+model WeightLog {
+  id       String   @id @default(cuid())
+  userId   String
+  date     DateTime
+  weightKg Decimal  @db.Decimal(5, 2)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
+}
+
+model WaterLog {
+  id     String   @id @default(cuid())
+  userId String
+  date   DateTime
+  ml     Int
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
+}
+
+model SteroidCycle {
+  id        String        @id @default(cuid())
+  userId    String
+  name      String
+  startDate DateTime
+  endDate   DateTime
+  notes     String?
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  doses     SteroidDose[]
+  exams     ExamFile[]    @relation("CycleExams")
+
+  @@index([userId, startDate, endDate])
+}
+
+model SteroidDose {
+  id                String   @id @default(cuid())
+  cycleId           String
+  compound          String
+  dosageMgPerWeek   Int
+  scheduleJson      Json
+  cycle             SteroidCycle @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+}
+
+model ExamFile {
+  id           String       @id @default(cuid())
+  userId       String
+  uploadedAt   DateTime     @default(now())
+  filename     String
+  mimetype     String
+  bytes        Int
+  storagePath  String
+  textExtracted String?
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  results      ExamResult[]
+  cycles       SteroidCycle[] @relation("CycleExams")
+}
+
+model ExamResult {
+  id            String   @id @default(cuid())
+  examFileId    String
+  marker        String
+  value         Float
+  unit          String?
+  referenceMin  Float?
+  referenceMax  Float?
+  isOutOfRange  Boolean
+  exam          ExamFile @relation(fields: [examFileId], references: [id], onDelete: Cascade)
+}
+
+model ExportJob {
+  id        String      @id @default(cuid())
+  userId    String
+  createdAt DateTime    @default(now())
+  type      ExportType
+  format    ExportFormat
+  status    ExportStatus
+  filePath  String?
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum ExportType {
+  FINANCE
+  HEALTH
+}
+
+enum ExportFormat {
+  CSV
+  PDF
+}
+
+enum ExportStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
