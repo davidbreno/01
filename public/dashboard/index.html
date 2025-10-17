@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Interativo | Finanças & Saúde</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app" data-theme="dark">
+    <aside class="sidebar" aria-label="Menu lateral">
+      <button class="sidebar-toggle" aria-label="Alternar menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="sidebar-content">
+        <div class="sidebar-header">Navegação</div>
+        <nav>
+          <button class="nav-item active" data-target="dashboard">
+            <span class="nav-icon" aria-hidden="true">🏠</span>
+            <span class="nav-label">Dashboard</span>
+          </button>
+          <button class="nav-item" data-target="transactions">
+            <span class="nav-icon" aria-hidden="true">💸</span>
+            <span class="nav-label">Entrada & Saída</span>
+          </button>
+          <button class="nav-item" data-target="accounts">
+            <span class="nav-icon" aria-hidden="true">🗓️</span>
+            <span class="nav-label">Contas</span>
+          </button>
+          <button class="nav-item" data-target="weight">
+            <span class="nav-icon" aria-hidden="true">⚖️</span>
+            <span class="nav-label">Peso</span>
+          </button>
+          <button class="nav-item" data-target="cycle">
+            <span class="nav-icon" aria-hidden="true">🧬</span>
+            <span class="nav-label">Ciclo</span>
+          </button>
+          <button class="nav-item" data-target="settings">
+            <span class="nav-icon" aria-hidden="true">⚙️</span>
+            <span class="nav-label">Configurações</span>
+          </button>
+        </nav>
+      </div>
+    </aside>
+    <div class="main">
+      <header class="topbar">
+        <div class="brand">Meu Painel</div>
+        <nav class="topbar-nav" aria-label="Navegação superior">
+          <a href="#" class="top-link active">Início</a>
+          <a href="#" class="top-link">Perfil</a>
+          <button class="top-link pill">Sair</button>
+        </nav>
+      </header>
+      <main class="content">
+        <section class="view active" id="dashboard" aria-labelledby="dashboard-title">
+          <div class="hero">
+            <h1 id="dashboard-title">Dashboard Interativo</h1>
+            <p>Finanças &amp; Saúde Pessoal</p>
+          </div>
+          <div class="grid primary">
+            <div class="donut-card" role="button" tabindex="0" data-target="accounts">
+              <canvas id="donutChart" width="260" height="260"></canvas>
+              <div class="donut-center">75%</div>
+            </div>
+            <div class="card highlight" role="button" tabindex="0" data-target="transactions">
+              <div class="card-chart">
+                <canvas id="summaryChart"></canvas>
+              </div>
+              <div class="card-info">
+                <div class="card-amount">3145 $</div>
+                <div class="card-sub">Lorem ipsum</div>
+                <div class="chip positive">
+                  <span class="chip-icon">▲</span>
+                  <span class="chip-value">21%</span>
+                </div>
+              </div>
+            </div>
+            <div class="equalizer" role="button" tabindex="0" data-target="weight" aria-label="Equalizador">
+              <div class="bars"></div>
+            </div>
+          </div>
+          <p class="cta">Clique em qualquer gráfico para ver mais detalhes ou editar.</p>
+          <div class="grid secondary">
+            <div class="vertical-sliders">
+              <div class="v-slider">
+                <input type="range" min="0" max="20" value="12" orient="vertical">
+                <span>2</span>
+              </div>
+              <div class="v-slider">
+                <input type="range" min="0" max="20" value="8" orient="vertical">
+                <span>4</span>
+              </div>
+              <div class="v-slider">
+                <input type="range" min="0" max="20" value="6" orient="vertical">
+                <span>6</span>
+              </div>
+              <div class="v-slider">
+                <input type="range" min="0" max="20" value="18" orient="vertical">
+                <span>13</span>
+              </div>
+            </div>
+            <div class="horizontal-sliders">
+              <label class="h-slider">
+                <span>70%</span>
+                <input type="range" min="0" max="100" value="70">
+              </label>
+              <label class="h-slider focus">
+                <span>50%</span>
+                <input type="range" min="0" max="100" value="50">
+              </label>
+              <label class="h-slider">
+                <span>30%</span>
+                <input type="range" min="0" max="100" value="30">
+              </label>
+              <label class="h-slider">
+                <span>10%</span>
+                <input type="range" min="0" max="100" value="10">
+              </label>
+              <div class="slider-empty"></div>
+            </div>
+            <div class="labels">
+              <div class="label-row">
+                <span>Your Text 01</span>
+              </div>
+              <div class="label-row">
+                <span>Your Text 02</span>
+              </div>
+              <div class="label-row">
+                <span>Your Text 03</span>
+              </div>
+              <div class="label-row">
+                <span>Your Text 04</span>
+              </div>
+            </div>
+            <div class="pyramid" role="button" tabindex="0" data-target="cycle">
+              <div class="level a">A</div>
+              <div class="level b">B</div>
+              <div class="level c">C</div>
+              <div class="level d">D</div>
+            </div>
+          </div>
+        </section>
+        <section class="view" id="transactions" aria-labelledby="transactions-title">
+          <div class="section-header">
+            <h2 id="transactions-title">Entrada &amp; Saída</h2>
+            <div class="totals">
+              <div class="total-item">
+                <span>Total Entradas</span>
+                <strong id="totalIncome">R$ 0,00</strong>
+              </div>
+              <div class="total-item">
+                <span>Total Saídas</span>
+                <strong id="totalExpense">R$ 0,00</strong>
+              </div>
+              <div class="total-item">
+                <span>Saldo</span>
+                <strong id="balance">R$ 0,00</strong>
+              </div>
+            </div>
+          </div>
+          <form class="form-grid" id="transactionForm">
+            <input type="hidden" id="transactionId">
+            <label>Tipo
+              <select id="transactionType" required>
+                <option value="entrada">Entrada</option>
+                <option value="saida">Saída</option>
+              </select>
+            </label>
+            <label>Valor
+              <input type="number" step="0.01" id="transactionValue" required>
+            </label>
+            <label>Categoria
+              <select id="transactionCategory" required>
+                <option value="Salário">Salário</option>
+                <option value="Alimentação">Alimentação</option>
+                <option value="Saúde">Saúde</option>
+                <option value="Moradia">Moradia</option>
+                <option value="Lazer">Lazer</option>
+                <option value="Transporte">Transporte</option>
+                <option value="Outros">Outros</option>
+              </select>
+            </label>
+            <label>Data
+              <input type="date" id="transactionDate" required>
+            </label>
+            <label>Observação
+              <input type="text" id="transactionNote" maxlength="60">
+            </label>
+            <div class="form-actions">
+              <button type="submit" class="primary">Adicionar</button>
+              <button type="button" id="transactionClear">Limpar</button>
+            </div>
+          </form>
+          <div class="filters">
+            <button class="chip filter" data-filter="month">Mês atual</button>
+            <select id="filterCategory">
+              <option value="">Todas categorias</option>
+            </select>
+            <select id="filterType">
+              <option value="">Todos os tipos</option>
+              <option value="entrada">Entradas</option>
+              <option value="saida">Saídas</option>
+            </select>
+            <select id="sortTransactions">
+              <option value="date_desc">Data ↓</option>
+              <option value="date_asc">Data ↑</option>
+              <option value="value_desc">Valor ↓</option>
+              <option value="value_asc">Valor ↑</option>
+            </select>
+            <button id="exportTransactions">Exportar</button>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Tipo</th>
+                  <th>Categoria</th>
+                  <th>Valor</th>
+                  <th>Observação</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="transactionList"></tbody>
+            </table>
+            <div class="pagination" id="transactionPagination"></div>
+          </div>
+        </section>
+        <section class="view" id="accounts" aria-labelledby="accounts-title">
+          <div class="section-header">
+            <h2 id="accounts-title">Contas</h2>
+            <button id="addAccount" class="primary">Adicionar conta</button>
+          </div>
+          <form class="form-grid" id="accountForm">
+            <input type="hidden" id="accountId">
+            <label>Nome da conta
+              <input type="text" id="accountName" required>
+            </label>
+            <label>Valor
+              <input type="number" step="0.01" id="accountValue" required>
+            </label>
+            <label>Data de vencimento
+              <input type="date" id="accountDue" required>
+            </label>
+            <label>Tipo
+              <select id="accountType" required>
+                <option value="pagar">Pagar</option>
+                <option value="receber">Receber</option>
+              </select>
+            </label>
+            <label class="toggle">Recorrente mensal
+              <input type="checkbox" id="accountRecurring">
+            </label>
+            <div class="form-actions">
+              <button type="submit" class="primary">Salvar</button>
+              <button type="button" id="accountClear">Limpar</button>
+            </div>
+          </form>
+          <div class="chips-status" id="accountStatusFilters"></div>
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Valor</th>
+                  <th>Vencimento</th>
+                  <th>Tipo</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="accountList"></tbody>
+            </table>
+          </div>
+          <div class="calendar">
+            <div class="calendar-header">
+              <button class="calendar-prev" aria-label="Mês anterior">◀</button>
+              <div class="calendar-title" id="calendarTitle"></div>
+              <button class="calendar-next" aria-label="Próximo mês">▶</button>
+            </div>
+            <div class="calendar-grid" id="calendarGrid"></div>
+          </div>
+          <aside class="calendar-panel" id="calendarPanel" aria-live="polite"></aside>
+        </section>
+        <section class="view" id="weight" aria-labelledby="weight-title">
+          <h2 id="weight-title">Peso &amp; Hidratação</h2>
+          <div class="charts-row">
+            <div class="chart-card">
+              <h3>Peso semanal</h3>
+              <canvas id="weightChart"></canvas>
+              <form id="weightForm">
+                <label>Semana
+                  <select id="weightWeek"></select>
+                </label>
+                <label>Peso (kg)
+                  <input type="number" step="0.1" id="weightValue" required>
+                </label>
+                <button type="submit" class="primary">Registrar</button>
+              </form>
+              <div class="stats" id="weightStats"></div>
+            </div>
+            <div class="chart-card">
+              <h3>Água diária</h3>
+              <canvas id="waterChart"></canvas>
+              <form id="waterForm">
+                <label>Data
+                  <input type="date" id="waterDate" required>
+                </label>
+                <label>Litros
+                  <input type="number" step="0.1" id="waterValue" required>
+                </label>
+                <button type="submit" class="primary">Registrar</button>
+              </form>
+              <div class="quick-water">
+                <span>Hoje bebi</span>
+                <input type="number" step="0.1" id="waterToday" aria-label="Litros consumidos hoje">
+                <button id="saveWaterToday">Salvar</button>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section class="view" id="cycle" aria-labelledby="cycle-title">
+          <h2 id="cycle-title">Ciclo &amp; Exames</h2>
+          <div class="section-grid">
+            <div>
+              <form class="form-grid" id="cycleForm">
+                <input type="hidden" id="cycleId">
+                <label>Composto
+                  <input type="text" id="cycleCompound" required>
+                </label>
+                <label>Dose (mg/ml)
+                  <input type="text" id="cycleDose" required>
+                </label>
+                <label>Data
+                  <input type="date" id="cycleDate" required>
+                </label>
+                <label>Observações
+                  <input type="text" id="cycleNote" maxlength="120">
+                </label>
+                <div class="form-actions">
+                  <button type="submit" class="primary">Salvar</button>
+                  <button type="button" id="cycleClear">Limpar</button>
+                </div>
+              </form>
+              <div class="table-wrapper">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Composto</th>
+                      <th>Dose</th>
+                      <th>Data</th>
+                      <th>Obs.</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="cycleList"></tbody>
+                </table>
+              </div>
+              <div class="tpc">
+                <h3>TPC</h3>
+                <textarea id="tpcNotes" rows="4" placeholder="Protocolo de TPC"></textarea>
+              </div>
+            </div>
+            <div class="labs">
+              <div class="labs-actions">
+                <button id="importLabs">Importar exames (CSV/TXT)</button>
+                <input type="file" id="labFile" accept=".csv,.txt" hidden>
+              </div>
+              <div class="table-wrapper">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Exame</th>
+                      <th>Valor</th>
+                      <th>Unidade</th>
+                      <th>Referência</th>
+                    </tr>
+                  </thead>
+                  <tbody id="labList"></tbody>
+                </table>
+              </div>
+              <p class="disclaimer">Este recurso é informativo e <strong>não</strong> substitui avaliação médica.</p>
+            </div>
+          </div>
+        </section>
+        <section class="view" id="settings" aria-labelledby="settings-title">
+          <h2 id="settings-title">Configurações</h2>
+          <div class="settings-grid">
+            <button id="exportSnapshot" class="primary">Exportar saldo</button>
+            <div class="setting-group">
+              <label for="themeSelect">Tema</label>
+              <select id="themeSelect">
+                <option value="dark">Dark</option>
+                <option value="light">Light</option>
+              </select>
+            </div>
+            <div class="setting-group">
+              <label for="fontSelect">Fonte</label>
+              <select id="fontSelect">
+                <option value="Inter">Inter</option>
+                <option value="Poppins">Poppins</option>
+                <option value="system">System UI</option>
+              </select>
+            </div>
+            <div class="setting-group">
+              <button id="exportBackup">Exportar backup</button>
+              <button id="importBackup">Restaurar backup</button>
+              <input type="file" id="backupFile" accept="application/json" hidden>
+            </div>
+            <button id="resetApp" class="danger">Resetar app</button>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
