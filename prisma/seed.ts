@@ -1,210 +1,106 @@
-import { PrismaClient, CategoryKind, TransactionType, BillStatus, ExportStatus, ExportFormat, ExportType } from '@prisma/client';
-import { addDays, subDays } from 'date-fns';
-import bcrypt from 'bcryptjs';
+import { PrismaClient, Role, Status } from '@prisma/client';
+import { hash } from 'bcrypt';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const password = await bcrypt.hash('senha123', 10);
+  const adminPassword = await hash('Admin!234', 10);
+  const medicoPassword = await hash('Medico!234', 10);
+  const recepcaoPassword = await hash('Recepcao!234', 10);
 
-  const user = await prisma.user.upsert({
-    where: { email: 'david@example.com' },
+  await prisma.user.upsert({
+    where: { email: 'admin@local' },
     update: {},
     create: {
-      email: 'david@example.com',
-      name: 'David',
-      hashedPassword: password
+      email: 'admin@local',
+      name: 'Administrador',
+      password: adminPassword,
+      role: Role.ADMIN
     }
   });
 
-  const categories = await Promise.all(
-    [
-      { name: 'Salário', kind: CategoryKind.IN },
-      { name: 'Investimentos', kind: CategoryKind.IN },
-      { name: 'Alimentação', kind: CategoryKind.OUT },
-      { name: 'Saúde', kind: CategoryKind.OUT },
-      { name: 'Lazer', kind: CategoryKind.OUT }
-    ].map((category) =>
-      prisma.category.upsert({
-        where: {
-          userId_name: {
-            userId: user.id,
-            name: category.name
-          }
-        },
-        update: {},
-        create: {
-          userId: user.id,
-          name: category.name,
-          kind: category.kind
+  const medico = await prisma.user.upsert({
+    where: { email: 'medico@local' },
+    update: {},
+    create: {
+      email: 'medico@local',
+      name: 'Dra. Helena Andrade',
+      password: medicoPassword,
+      role: Role.MEDICO
+    }
+  });
+
+  await prisma.user.upsert({
+    where: { email: 'recepcao@local' },
+    update: {},
+    create: {
+      email: 'recepcao@local',
+      name: 'Recepção',
+      password: recepcaoPassword,
+      role: Role.RECEPCAO
+    }
+  });
+
+  const pacientes = await prisma.$transaction(
+    Array.from({ length: 5 }).map((_, index) =>
+      prisma.paciente.create({
+        data: {
+          nome: `Paciente ${index + 1}`,
+          cpf: `0000000000${index + 1}`.slice(-11),
+          nascimento: new Date(1985, index, 10 + index),
+          sexo: index % 2 === 0 ? 'FEMININO' : 'MASCULINO',
+          telefone: '(11) 99999-0000',
+          email: `paciente${index + 1}@local`,
+          endereco: 'Rua das Clínicas, 123',
+          convenio: index % 2 === 0 ? 'Saúde Total' : 'Vida Mais',
+          carteirinha: `CART-${index + 1}`,
+          alergias: index % 2 === 0 ? 'Dipirona' : null,
+          observacoes: 'Paciente cadastrado via seed.'
         }
       })
     )
   );
 
-  const inCategory = categories.find((c) => c.kind === CategoryKind.IN) ?? categories[0];
-  const outCategory = categories.find((c) => c.kind === CategoryKind.OUT) ?? categories[2];
-
-  const today = new Date();
-
-  await prisma.transaction.createMany({
-    data: [
-      {
-        userId: user.id,
-        type: TransactionType.IN,
-        amount: 8500,
-        categoryId: inCategory.id,
-        date: subDays(today, 10),
-        note: 'Salário mensal'
-      },
-      {
-        userId: user.id,
-        type: TransactionType.OUT,
-        amount: 1200,
-        categoryId: outCategory.id,
-        date: subDays(today, 8),
-        note: 'Supermercado'
-      },
-      {
-        userId: user.id,
-        type: TransactionType.OUT,
-        amount: 300,
-        categoryId: outCategory.id,
-        date: subDays(today, 3),
-        note: 'Farmácia'
-      },
-      {
-        userId: user.id,
-        type: TransactionType.IN,
-        amount: 1500,
-        categoryId: inCategory.id,
-        date: subDays(today, 2),
-        note: 'Freelancer'
-      }
-    ]
+  await prisma.consulta.createMany({
+    data: pacientes.map((paciente, index) => ({
+      pacienteId: paciente.id,
+      medicoId: medico.id,
+      inicio: new Date(Date.now() + index * 86400000),
+      fim: new Date(Date.now() + index * 86400000 + 3600000),
+      status: index % 3 === 0 ? Status.CONFIRMADA : Status.AGENDADA,
+      notas: index % 2 === 0 ? 'Acompanhar pressão arterial.' : null
+    }))
   });
 
-  await prisma.bill.createMany({
-    data: [
-      {
-        userId: user.id,
-        title: 'Plano de saúde',
-        amount: 450,
-        dueDate: addDays(today, 5),
-        status: BillStatus.PENDING
-      },
-      {
-        userId: user.id,
-        title: 'Academia',
-        amount: 180,
-        dueDate: addDays(today, 2),
-        status: BillStatus.PENDING
-      },
-      {
-        userId: user.id,
-        title: 'Cartão de crédito',
-        amount: 3200,
-        dueDate: subDays(today, 4),
-        status: BillStatus.PAID
-      }
-    ]
-  });
-
-  const weightEntries = Array.from({ length: 6 }).map((_, index) => ({
-    userId: user.id,
-    date: subDays(today, index * 7),
-    weightKg: 88 - index * 0.5
-  }));
-
-  await prisma.weightLog.createMany({ data: weightEntries });
-
-  const waterEntries = Array.from({ length: 7 }).flatMap((_, index) => {
-    const date = subDays(today, index);
-    return [
-      { userId: user.id, date, ml: 500 },
-      { userId: user.id, date, ml: 1000 },
-      { userId: user.id, date, ml: 750 }
-    ];
-  });
-
-  await prisma.waterLog.createMany({ data: waterEntries });
-
-  const cycle = await prisma.steroidCycle.create({
+  const consultaFinalizada = await prisma.consulta.create({
     data: {
-      userId: user.id,
-      name: 'Ciclo Cutting 2024',
-      startDate: subDays(today, 14),
-      endDate: addDays(today, 70),
-      notes: 'Monitorar marcadores hepáticos',
-      doses: {
-        create: [
-          {
-            compound: 'Testosterona Enantato',
-            dosageMgPerWeek: 500,
-            scheduleJson: { monday: '250mg', thursday: '250mg' }
-          },
-          {
-            compound: 'Oxandrolona',
-            dosageMgPerWeek: 210,
-            scheduleJson: { daily: '30mg' }
-          }
-        ]
+      pacienteId: pacientes[0].id,
+      medicoId: medico.id,
+      inicio: new Date(Date.now() - 86400000),
+      fim: new Date(Date.now() - 86400000 + 3600000),
+      status: Status.CONCLUIDA,
+      notas: 'Retorno de avaliação anual.'
+    }
+  });
+
+  await prisma.prontuario.create({
+    data: {
+      pacienteId: pacientes[0].id,
+      consultaId: consultaFinalizada.id,
+      criadoPorId: medico.id,
+      conteudo: {
+        anamnese: 'Paciente relata dores de cabeça frequentes.',
+        diagnostico: 'Cefaleia tensional.',
+        prescricao: 'Repouso, hidratação e analgésico leve.',
+        observacoes: 'Reavaliar em 30 dias.'
       }
     }
   });
 
-  const exam = await prisma.examFile.create({
-    data: {
-      userId: user.id,
-      filename: 'exame-labs.pdf',
-      mimetype: 'application/pdf',
-      bytes: 1024,
-      storagePath: 'uploads/exame-labs.pdf',
-      textExtracted: `Hemoglobina: 16 g/dL\nHematócrito: 49 %\nLeucócitos: 6500 /mm3\nGlicemia: 70 mg/dL\nTGO/AST: 42 U/L\nTGP/ALT: 45 U/L\nCreatinina: 1.0 mg/dL\nColesterol Total: 210 mg/dL\nHDL: 45 mg/dL\nLDL: 150 mg/dL\nTriglicerídeos: 180 mg/dL\nTSH: 2.4 uUI/mL`
-    }
-  });
-
-  await prisma.examResult.createMany({
-    data: [
-      {
-        examFileId: exam.id,
-        marker: 'Hemoglobina',
-        value: 16,
-        unit: 'g/dL',
-        referenceMin: 13.5,
-        referenceMax: 17.5,
-        isOutOfRange: false
-      },
-      {
-        examFileId: exam.id,
-        marker: 'LDL',
-        value: 150,
-        unit: 'mg/dL',
-        referenceMin: 0,
-        referenceMax: 129,
-        isOutOfRange: true
-      }
-    ]
-  });
-
-  await prisma.exportJob.create({
-    data: {
-      userId: user.id,
-      type: ExportType.FINANCE,
-      format: ExportFormat.CSV,
-      status: ExportStatus.COMPLETED,
-      filePath: 'exports/financeiro.csv'
-    }
-  });
-
-  await prisma.examFile.update({
-    where: { id: exam.id },
-    data: {
-      cycles: {
-        connect: { id: cycle.id }
-      }
-    }
-  });
+  console.log('Seed concluído com usuários padrão:');
+  console.log('Admin -> admin@local / Admin!234');
+  console.log('Médico -> medico@local / Medico!234');
+  console.log('Recepção -> recepcao@local / Recepcao!234');
 }
 
 main()

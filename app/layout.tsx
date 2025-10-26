@@ -8,24 +8,17 @@ import { AuthProvider } from '@/providers/auth-provider';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'Controle Pessoal — by David',
-  description: 'Dashboard integrado de finanças e saúde com Next.js'
+  title: 'Clínica Prisma — Controle de Pacientes',
+  description:
+    'Sistema completo de controle de pacientes, agendas e prontuários para clínicas modernas.',
+  metadataBase: new URL('https://controle-pacientes.local')
 };
 
-export default function RootLayout({
-  children
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <body
-        className={cn(
-          inter.variable,
-          'min-h-screen bg-grayui-50 text-grayui-900 transition-colors duration-300 dark:bg-grayui-900 dark:text-grayui-50'
-        )}
-      >
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} storageKey="controle-pessoal-theme">
+      <body className={cn(inter.variable, 'min-h-screen bg-background font-sans antialiased')}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem storageKey="clinica-prisma-theme">
           <AuthProvider>{children}</AuthProvider>
         </ThemeProvider>
       </body>
