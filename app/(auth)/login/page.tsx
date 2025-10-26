@@ -32,12 +32,29 @@ export default function LoginPage() {
 
   const onSubmit = async (data: FormData) => {
     setError(null);
-    const result = await signIn('credentials', { redirect: false, ...data });
+
+    // Recupera callbackUrl possivelmente enviado pelo middleware/next-auth
+    let callbackUrl = params.get('callbackUrl') ?? '';
+
+    // Se a url estiver codificada múltiplas vezes (contendo %25), decodifica até estabilizar
+    try {
+      let prev = null;
+      while (callbackUrl && callbackUrl.includes('%25') && callbackUrl !== prev) {
+        prev = callbackUrl;
+        callbackUrl = decodeURIComponent(callbackUrl);
+      }
+    } catch (e) {
+      // se falhar na decodificação, ignora e usa callbackUrl original
+    }
+
+    const result = await signIn('credentials', { redirect: false, ...data, callbackUrl: callbackUrl || undefined });
     if (result?.error) {
       setError('Credenciais inválidas. Verifique seu e-mail e senha.');
       return;
     }
-    router.replace('/dashboard');
+
+    // Redireciona para callbackUrl quando presente, senão para dashboard
+    router.replace(callbackUrl || '/dashboard');
   };
 
   return (

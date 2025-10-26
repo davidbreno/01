@@ -1,16 +1,22 @@
+import 'dotenv/config';
 import { PrismaClient, Role, Status } from '@prisma/client';
-import { hash } from 'bcrypt';
+import { hash } from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function main() {
   const adminPassword = await hash('Admin!234', 10);
   const medicoPassword = await hash('Medico!234', 10);
+  const gestorPassword = await hash('11507727607dD@', 10);
   const recepcaoPassword = await hash('Recepcao!234', 10);
 
   await prisma.user.upsert({
     where: { email: 'admin@local' },
-    update: {},
+    update: {
+      name: 'Administrador',
+      password: adminPassword,
+      role: Role.ADMIN
+    },
     create: {
       email: 'admin@local',
       name: 'Administrador',
@@ -21,7 +27,11 @@ async function main() {
 
   const medico = await prisma.user.upsert({
     where: { email: 'medico@local' },
-    update: {},
+    update: {
+      name: 'Dra. Helena Andrade',
+      password: medicoPassword,
+      role: Role.MEDICO
+    },
     create: {
       email: 'medico@local',
       name: 'Dra. Helena Andrade',
@@ -32,12 +42,31 @@ async function main() {
 
   await prisma.user.upsert({
     where: { email: 'recepcao@local' },
-    update: {},
-    create: {
-      email: 'recepcao@local',
-      name: 'Recepção',
+    update: {
+      name: 'Recepcao',
       password: recepcaoPassword,
       role: Role.RECEPCAO
+    },
+    create: {
+      email: 'recepcao@local',
+      name: 'Recepcao',
+      password: recepcaoPassword,
+      role: Role.RECEPCAO
+    }
+  });
+
+  await prisma.user.upsert({
+    where: { email: 'gestor@clinica.com' },
+    update: {
+      name: 'Gestor',
+      password: gestorPassword,
+      role: Role.ADMIN
+    },
+    create: {
+      email: 'gestor@clinica.com',
+      name: 'Gestor',
+      password: gestorPassword,
+      role: Role.ADMIN
     }
   });
 
@@ -51,8 +80,8 @@ async function main() {
           sexo: index % 2 === 0 ? 'FEMININO' : 'MASCULINO',
           telefone: '(11) 99999-0000',
           email: `paciente${index + 1}@local`,
-          endereco: 'Rua das Clínicas, 123',
-          convenio: index % 2 === 0 ? 'Saúde Total' : 'Vida Mais',
+          endereco: 'Rua das Clinicas, 123',
+          convenio: index % 2 === 0 ? 'Saude Total' : 'Vida Mais',
           carteirinha: `CART-${index + 1}`,
           alergias: index % 2 === 0 ? 'Dipirona' : null,
           observacoes: 'Paciente cadastrado via seed.'
@@ -68,7 +97,7 @@ async function main() {
       inicio: new Date(Date.now() + index * 86400000),
       fim: new Date(Date.now() + index * 86400000 + 3600000),
       status: index % 3 === 0 ? Status.CONFIRMADA : Status.AGENDADA,
-      notas: index % 2 === 0 ? 'Acompanhar pressão arterial.' : null
+      notas: index % 2 === 0 ? 'Acompanhar pressao arterial.' : null
     }))
   });
 
@@ -79,7 +108,7 @@ async function main() {
       inicio: new Date(Date.now() - 86400000),
       fim: new Date(Date.now() - 86400000 + 3600000),
       status: Status.CONCLUIDA,
-      notas: 'Retorno de avaliação anual.'
+      notas: 'Retorno de avaliacao anual.'
     }
   });
 
@@ -89,18 +118,19 @@ async function main() {
       consultaId: consultaFinalizada.id,
       criadoPorId: medico.id,
       conteudo: {
-        anamnese: 'Paciente relata dores de cabeça frequentes.',
+        anamnese: 'Paciente relata dores de cabeca frequentes.',
         diagnostico: 'Cefaleia tensional.',
-        prescricao: 'Repouso, hidratação e analgésico leve.',
+        prescricao: 'Repouso, hidratacao e analgesico leve.',
         observacoes: 'Reavaliar em 30 dias.'
       }
     }
   });
 
-  console.log('Seed concluído com usuários padrão:');
+  console.log('Seed concluido com usuarios padrao:');
   console.log('Admin -> admin@local / Admin!234');
-  console.log('Médico -> medico@local / Medico!234');
-  console.log('Recepção -> recepcao@local / Recepcao!234');
+  console.log('Medico -> medico@local / Medico!234');
+  console.log('Recepcao -> recepcao@local / Recepcao!234');
+  console.log('Gestor -> gestor@local / Gestor!234');
 }
 
 main()

@@ -2,22 +2,16 @@
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { consultaSchema } from '@/lib/validations/consulta';
+import { Loader2 } from 'lucide-react';
+import { consultaFormSchema, ConsultaFormValues } from '@/lib/validations/consulta';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 
-type ConsultaStatus = 'AGENDADA' | 'CONFIRMADA' | 'CANCELADA' | 'CONCLUIDA';
+type ConsultaStatus = ConsultaFormValues['status'];
 
-const formSchema = consultaSchema.extend({
-  inicio: z.string().min(1),
-  fim: z.string().min(1),
-  status: z.enum(['AGENDADA', 'CONFIRMADA', 'CANCELADA', 'CONCLUIDA'])
-});
-
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = ConsultaFormValues;
 
 interface Option {
   id: string;
@@ -49,7 +43,7 @@ export function ConsultationForm({
     handleSubmit,
     formState: { errors }
   } = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(consultaFormSchema),
     defaultValues: {
       pacienteId: defaultValues?.pacienteId ?? '',
       medicoId: defaultValues?.medicoId ?? '',
@@ -61,7 +55,7 @@ export function ConsultationForm({
   });
 
   return (
-    <form className="space-y-4" onSubmit={handleSubmit(onSubmit)} noValidate>
+    <form className="space-y-4" onSubmit={handleSubmit(onSubmit)} noValidate aria-busy={submitting}>
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="pacienteId">Paciente</Label>
@@ -125,8 +119,16 @@ export function ConsultationForm({
         <Textarea id="notas" rows={4} {...register('notas')} placeholder="Informações adicionais" />
       </div>
       <Button type="submit" className="w-full" disabled={submitting}>
-        {submitting ? 'Salvando…' : 'Salvar'}
+        {submitting ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Salvando...
+          </>
+        ) : (
+          'Salvar'
+        )}
       </Button>
     </form>
   );
 }
+

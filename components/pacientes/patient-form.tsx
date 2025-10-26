@@ -3,6 +3,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { Loader2 } from 'lucide-react';
 import { pacienteSchema } from '@/lib/validations/paciente';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -54,7 +55,7 @@ export function PatientForm({
   });
 
   return (
-    <form className="space-y-4" onSubmit={handleSubmit(onSubmit)} noValidate>
+    <form className="space-y-4" onSubmit={handleSubmit(onSubmit)} noValidate aria-busy={submitting}>
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="nome">Nome completo</Label>
@@ -119,7 +120,14 @@ export function PatientForm({
         <Textarea id="observacoes" rows={4} {...register('observacoes')} />
       </div>
       <Button type="submit" className="w-full" disabled={submitting}>
-        {submitting ? 'Salvando…' : 'Salvar'}
+        {submitting ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Salvando...
+          </>
+        ) : (
+          'Salvar'
+        )}
       </Button>
     </form>
   );

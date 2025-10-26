@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert } from '@/components/ui/alert';
@@ -100,7 +101,7 @@ export function ProntuarioForm({ pacienteId, consultas }: { pacienteId: string; 
   };
 
   return (
-    <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+    <form className="space-y-4" onSubmit={handleSubmit(onSubmit)} aria-busy={loading}>
       {message ? <Alert tone="success" title={message} /> : null}
       {error ? <Alert tone="danger" title={error} /> : null}
       <input type="hidden" value={pacienteId} {...register('pacienteId')} />
@@ -151,7 +152,14 @@ export function ProntuarioForm({ pacienteId, consultas }: { pacienteId: string; 
         />
       </div>
       <Button type="submit" disabled={loading}>
-        {loading ? 'Salvando…' : 'Salvar registro'}
+        {loading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Salvando...
+          </>
+        ) : (
+          'Salvar registro'
+        )}
       </Button>
     </form>
   );

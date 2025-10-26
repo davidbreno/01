@@ -1,6 +1,7 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { getRelatorioResumo } from '@/lib/services/relatorios';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
@@ -16,8 +17,8 @@ const STATUS_LABELS: Record<Status, string> = {
 };
 
 async function getSummary(role: Role) {
-  const [pacientes, consultasProximas, consultasPorStatus, consultasPorMedico] = await Promise.all([
-    prisma.paciente.count({ where: { createdAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } } }),
+  const [resumo, consultasProximas] = await Promise.all([
+    getRelatorioResumo(),
     prisma.consulta.findMany({
       where: {
         inicio: { gte: new Date() },
@@ -26,31 +27,14 @@ async function getSummary(role: Role) {
       include: { paciente: true, medico: true },
       orderBy: { inicio: 'asc' },
       take: 5
-    }),
-    prisma.consulta.groupBy({
-      by: ['status'],
-      _count: { _all: true }
-    }),
-    prisma.consulta.groupBy({
-      by: ['medicoId'],
-      _count: { _all: true }
     })
   ]);
 
-  const medicos = await prisma.user.findMany({
-    where: { role: Role.MEDICO, id: { in: consultasPorMedico.map((c) => c.medicoId) } },
-    select: { id: true, name: true }
-  });
-
   return {
-    pacientes,
+    pacientes: resumo.novosPacientes,
     consultasProximas,
-    consultasPorStatus,
-    consultasPorMedico: consultasPorMedico.map((item) => ({
-      medicoId: item.medicoId,
-      medico: medicos.find((medico) => medico.id === item.medicoId)?.name ?? 'Não informado',
-      total: item._count._all
-    })),
+    consultasPorStatus: resumo.consultasPorStatus,
+    consultasPorMedico: resumo.consultasPorMedico,
     role
   };
 }
@@ -61,6 +45,7 @@ export default async function DashboardPage() {
   if (!user) {
     return null;
   }
+
   const summary = await getSummary(user.role);
 
   return (
@@ -74,6 +59,7 @@ export default async function DashboardPage() {
           <p className="mt-2 text-sm text-muted-foreground">Taxa de crescimento acompanhada semanalmente.</p>
         </CardContent>
       </Card>
+
       <Card className="lg:col-span-4">
         <CardHeader>
           <CardTitle>Consultas por status</CardTitle>
@@ -87,6 +73,7 @@ export default async function DashboardPage() {
           ))}
         </CardContent>
       </Card>
+
       <Card className="lg:col-span-4">
         <CardHeader>
           <CardTitle>Consultas por médico</CardTitle>
@@ -100,6 +87,7 @@ export default async function DashboardPage() {
           ))}
         </CardContent>
       </Card>
+
       <Card className="lg:col-span-6">
         <CardHeader>
           <CardTitle>Próximas consultas</CardTitle>
@@ -125,6 +113,7 @@ export default async function DashboardPage() {
           )}
         </CardContent>
       </Card>
+
       <Card className="lg:col-span-6">
         <CardHeader>
           <CardTitle>Atualizações recentes</CardTitle>
@@ -143,9 +132,11 @@ async function RecentUpdates() {
     orderBy: { createdAt: 'desc' },
     include: { user: { select: { name: true } } }
   });
+
   if (logs.length === 0) {
     return <p className="text-sm text-muted-foreground">Nenhuma atividade registrada ainda.</p>;
   }
+
   return (
     <ul className="space-y-3">
       {logs.map((log) => (
@@ -155,7 +146,7 @@ async function RecentUpdates() {
             <span>{formatDate(log.createdAt)}</span>
           </div>
           <p className="mt-2 text-sm font-medium text-foreground">
-            {log.action.replaceAll('_', ' ')} — {log.entity}
+            {log.action.replaceAll('_', ' ')} - {log.entity}
           </p>
         </li>
       ))}

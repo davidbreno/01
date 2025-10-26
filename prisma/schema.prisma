@@ -75,7 +75,7 @@ model Consulta {
 model Prontuario {
   id          String      @id @default(cuid())
   pacienteId  String
-  consultaId  String?
+  consultaId  String? @unique
   criadoPorId String
   conteudo    Json
   paciente    Paciente    @relation(fields: [pacienteId], references: [id])
