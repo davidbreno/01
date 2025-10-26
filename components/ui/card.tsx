@@ -1,20 +1,29 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
-export type CardProps = React.HTMLAttributes<HTMLDivElement>;
+const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(({ className, ...props }, ref) => (
+  <div ref={ref} className={cn('rounded-2xl border bg-card p-6 text-card-foreground shadow-sm', className)} {...props} />
+));
+Card.displayName = 'Card';
 
-export function Card({ className, ...props }: CardProps) {
-  return <div className={cn('rounded-xl bg-white/80 p-6 shadow-soft backdrop-blur dark:bg-grayui-800/80', className)} {...props} />;
-}
+const CardHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={cn('mb-4 flex flex-col gap-1', className)} {...props} />
+);
 
-export function CardHeader({ className, ...props }: CardProps) {
-  return <div className={cn('mb-4 flex items-center justify-between gap-4', className)} {...props} />;
-}
+const CardTitle = ({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+  <h3 className={cn('text-lg font-semibold tracking-tight', className)} {...props} />
+);
 
-export function CardTitle({ className, ...props }: CardProps) {
-  return <h3 className={cn('text-lg font-semibold text-grayui-900 dark:text-grayui-50', className)} {...props} />;
-}
+const CardDescription = ({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) => (
+  <p className={cn('text-sm text-muted-foreground', className)} {...props} />
+);
 
-export function CardContent({ className, ...props }: CardProps) {
-  return <div className={cn('space-y-4', className)} {...props} />;
-}
+const CardContent = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={cn('space-y-4', className)} {...props} />
+);
+
+const CardFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={cn('mt-6 flex items-center justify-end gap-2', className)} {...props} />
+);
+
+export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter };

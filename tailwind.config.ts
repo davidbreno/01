@@ -2,29 +2,39 @@ import type { Config } from 'tailwindcss';
 import forms from '@tailwindcss/forms';
 
 const config: Config = {
-  content: [
-    './app/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './lib/**/*.{ts,tsx}',
-    './providers/**/*.{ts,tsx}'
-  ],
+  darkMode: ['class'],
+  content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}', './lib/**/*.{ts,tsx}', './providers/**/*.{ts,tsx}'],
   theme: {
     extend: {
-      fontFamily: {
-        sans: ['Inter', 'sans-serif']
-      },
       colors: {
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
         primary: {
-          50: '#e6f4ef',
-          100: '#c5e4d7',
-          200: '#a4d5c0',
-          300: '#83c6a8',
-          400: '#62b790',
-          500: '#159765',
-          600: '#147a57',
-          700: '#125f46',
-          800: '#0f3d2e',
-          900: '#0b241c'
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))'
+        },
+        secondary: {
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))'
+        },
+        muted: {
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))'
+        },
+        accent: {
+          DEFAULT: 'hsl(var(--accent))',
+          foreground: 'hsl(var(--accent-foreground))'
+        },
+        destructive: {
+          DEFAULT: 'hsl(var(--destructive))',
+          foreground: 'hsl(var(--destructive-foreground))'
+        },
+        card: {
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))'
         },
         grayui: {
           50: '#f8fafc',
@@ -37,10 +47,7 @@ const config: Config = {
           700: '#1e293b',
           800: '#16213b',
           900: '#0f172a'
-        },
-        success: '#22c55e',
-        warning: '#f59e0b',
-        danger: '#ef4444'
+        }
       },
       borderRadius: {
         xl: '16px',
@@ -49,8 +56,8 @@ const config: Config = {
       boxShadow: {
         soft: '0 15px 40px rgba(15,61,46,0.15)'
       },
-      backgroundImage: {
-        'primary-gradient': 'linear-gradient(135deg, #159765 0%, #0f3d2e 100%)'
+      fontFamily: {
+        sans: ['Inter', 'sans-serif']
       }
     }
   },
