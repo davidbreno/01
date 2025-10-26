@@ -8,6 +8,7 @@ const config: Config = {
     '^@/(.*)$': '<rootDir>/$1',
     '^uuid$': require.resolve('uuid')
   },
+  testPathIgnorePatterns: ['<rootDir>/tests/e2e/', '<rootDir>/tests/integration/'],
   transform: {
     '^.+\\.(t|j)sx?$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.json' }]
   },
