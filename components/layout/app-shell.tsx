@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, Users, CalendarDays, FileText, PieChart, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, CalendarDays, FileText, PieChart, LogOut, Boxes, User as UserIcon } from 'lucide-react';
 import { Role } from '@prisma/client';
 import { signOut } from 'next-auth/react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -25,7 +25,9 @@ const links = [
   { label: 'Pacientes', href: '/pacientes', icon: Users, roles: [Role.ADMIN, Role.MEDICO, Role.RECEPCAO] },
   { label: 'Consultas', href: '/consultas', icon: CalendarDays, roles: [Role.ADMIN, Role.MEDICO, Role.RECEPCAO] },
   { label: 'Prontuários', href: '/prontuarios', icon: FileText, roles: [Role.ADMIN, Role.MEDICO] },
-  { label: 'Relatórios', href: '/relatorios', icon: PieChart, roles: [Role.ADMIN, Role.RECEPCAO] }
+  { label: 'Relatórios', href: '/relatorios', icon: PieChart, roles: [Role.ADMIN, Role.RECEPCAO] },
+  { label: 'Estoque', href: '/estoque', icon: Boxes, roles: [Role.ADMIN, Role.RECEPCAO, Role.MEDICO] },
+  { label: 'Usuários', href: '/usuarios', icon: UserIcon, roles: [Role.ADMIN] }
 ];
 
 export function AppShell({ user, children }: ShellProps) {

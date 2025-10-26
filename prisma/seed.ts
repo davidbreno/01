@@ -1,6 +1,6 @@
-import 'dotenv/config';
-import { PrismaClient, Role, Status } from '@prisma/client';
-import { hash } from 'bcryptjs';
+require('dotenv/config');
+const { PrismaClient, Role, Status } = require('@prisma/client');
+const { hash } = require('bcryptjs');
 
 const prisma = new PrismaClient();
 
@@ -9,6 +9,21 @@ async function main() {
   const medicoPassword = await hash('Medico!234', 10);
   const gestorPassword = await hash('11507727607dD@', 10);
   const recepcaoPassword = await hash('Recepcao!234', 10);
+  const davidPassword = await hash('3137221629', 10);
+  await prisma.user.upsert({
+    where: { email: 'david@clinica.com' },
+    update: {
+      name: 'David Breno',
+      password: davidPassword,
+      role: Role.ADMIN
+    },
+    create: {
+      email: 'david@clinica.com',
+      name: 'David Breno',
+      password: davidPassword,
+      role: Role.ADMIN
+    }
+  });
 
   await prisma.user.upsert({
     where: { email: 'admin@local' },
@@ -71,7 +86,7 @@ async function main() {
   });
 
   const pacientes = await prisma.$transaction(
-    Array.from({ length: 5 }).map((_, index) =>
+    Array.from({ length: 5 }).map((_, index: any) =>
       prisma.paciente.create({
         data: {
           nome: `Paciente ${index + 1}`,
@@ -91,7 +106,7 @@ async function main() {
   );
 
   await prisma.consulta.createMany({
-    data: pacientes.map((paciente, index) => ({
+    data: pacientes.map((paciente: any, index: any) => ({
       pacienteId: paciente.id,
       medicoId: medico.id,
       inicio: new Date(Date.now() + index * 86400000),
