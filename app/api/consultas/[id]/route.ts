@@ -61,9 +61,18 @@ export async function PUT(request: Request, { params }: Params) {
       return NextResponse.json({ error: 'Consulta não encontrada' }, { status: 404 });
     }
     await assertNoConflict(payload.medicoId, payload.inicio, payload.fim, params.id);
+    const rawBefore = before as any;
+    const data: any = {
+      ...payload,
+      lembreteAtivo: !!payload.lembreteAtivo,
+      lembreteAntecedenciaMinutos: payload.lembreteAtivo
+        ? payload.lembreteAntecedenciaMinutos ?? rawBefore?.lembreteAntecedenciaMinutos ?? 30
+        : null,
+      lembreteEnviadoEm: payload.lembreteAtivo ? rawBefore?.lembreteEnviadoEm ?? null : null
+    };
     const consulta = await prisma.consulta.update({
       where: { id: params.id },
-      data: payload,
+      data,
       include: { paciente: true, medico: true }
     });
     await writeAuditLog({

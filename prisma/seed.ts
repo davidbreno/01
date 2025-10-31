@@ -141,6 +141,121 @@ async function main() {
     }
   });
 
+  const prismaAny = prisma as any;
+
+  const perguntasBase = [
+    { pergunta: 'Você faz uso contínuo de medicamentos?', categoria: 'Histórico clínico', ordem: 1 },
+    { pergunta: 'Possui alergia a algum medicamento ou material odontológico?', categoria: 'Alergias', ordem: 2 },
+    { pergunta: 'Teve cirurgias ou hospitalizações nos últimos 5 anos?', categoria: 'Cirurgias', ordem: 3 },
+    { pergunta: 'Sente dores frequentes na articulação temporomandibular?', categoria: 'ATM', ordem: 4 },
+    { pergunta: 'Gestantes ou lactantes?', categoria: 'Condições específicas', ordem: 5 }
+  ];
+
+  await prismaAny.anamnesePergunta.createMany({ data: perguntasBase, skipDuplicates: true });
+
+  const perguntas = await prismaAny.anamnesePergunta.findMany({ orderBy: { ordem: 'asc' } });
+  if (perguntas.length) {
+    await prismaAny.anamneseResposta.createMany({
+      data: perguntas.slice(0, 3).map((pergunta: any, index: number) => ({
+        pacienteId: pacientes[0].id,
+        perguntaId: pergunta.id,
+        resposta:
+          index === 0
+            ? 'Utiliza anti-hipertensivo diariamente.'
+            : index === 1
+              ? 'Alergia conhecida a látex.'
+              : 'Nenhuma cirurgia recente.'
+      })),
+      skipDuplicates: true
+    });
+  }
+
+  await prismaAny.pacienteDocumento.createMany({
+    data: [
+      {
+        pacienteId: pacientes[0].id,
+        titulo: 'Radiografia panorâmica 2024',
+        tipo: 'RADIOGRAFIA',
+        arquivoUrl: '/uploads/sample-rx.png',
+        arquivoNome: 'rx_panorama.png',
+        mimeType: 'image/png',
+        tamanho: 120394,
+        observacoes: 'Verificar evolução óssea em 6 meses.'
+      },
+      {
+        pacienteId: pacientes[1].id,
+        titulo: 'Ficha de anamnese assinada',
+        tipo: 'PRONTUARIO',
+        arquivoUrl: '/uploads/anamnese.pdf',
+        arquivoNome: 'anamnese.pdf',
+        mimeType: 'application/pdf',
+        tamanho: 45012,
+        observacoes: null
+      }
+    ],
+    skipDuplicates: true
+  });
+
+  await prismaAny.implanteEstoqueItem.createMany({
+    data: [
+      {
+        categoria: 'CMI',
+        modelo: 'Cone Morse CMI 3.5',
+        tamanho: '11.5mm',
+        marca: 'Neodent',
+        quantidade: 12,
+        imagemUrl: '/uploads/implante-cmi.png'
+      },
+      {
+        categoria: 'HE',
+        modelo: 'HE Arcsys 4.3',
+        tamanho: '9mm',
+        marca: 'Straumann',
+        quantidade: 8,
+        imagemUrl: '/uploads/implante-he.png'
+      },
+      {
+        categoria: 'HI_TAPA',
+        modelo: 'HI Tapa Titanium 3.8',
+        tamanho: '13mm',
+        marca: 'SIN',
+        quantidade: 5,
+        imagemUrl: '/uploads/implante-hi.png'
+      }
+    ],
+    skipDuplicates: true
+  });
+
+  await prismaAny.materialEstoqueItem.createMany({
+    data: [
+      {
+        nome: 'Resina Filtek Z350 XT',
+        categoria: 'Dentística',
+        marca: '3M',
+        modelo: 'A2E',
+        unidade: 'seringa',
+        quantidade: 15
+      },
+      {
+        nome: 'Adesivo Single Bond Universal',
+        categoria: 'Dentística',
+        marca: '3M',
+        modelo: 'Universal',
+        unidade: 'frasco 5ml',
+        quantidade: 10
+      },
+      {
+        nome: 'Luva de procedimento',
+        categoria: 'Descartáveis',
+        marca: 'Supermax',
+        modelo: 'M',
+        unidade: 'caixa com 100',
+        quantidade: 24
+      }
+    ],
+    skipDuplicates: true
+  });
+
   console.log('Seed concluido com usuarios padrao:');
   console.log('Admin -> admin@local / Admin!234');
   console.log('Medico -> medico@local / Medico!234');

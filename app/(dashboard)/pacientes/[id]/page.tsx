@@ -7,6 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { formatDate } from '@/lib/utils';
 import { ProntuarioForm } from '@/components/prontuarios/prontuario-form';
 import { Status } from '@prisma/client';
+import { PatientDocuments } from '@/components/pacientes/patient-documents';
+import { PatientAnamnesis } from '@/components/pacientes/patient-anamnesis';
 
 const STATUS_LABELS: Record<Status, string> = {
   AGENDADA: 'Agendada',
@@ -34,6 +36,9 @@ export default async function PacienteDetalhePage({ params }: PageProps) {
   if (!paciente) {
     notFound();
   }
+
+  const documentos = (paciente as any).documentos ?? [];
+  const anamneses = (paciente as any).anamneses ?? [];
 
   return (
     <div className="space-y-6">
@@ -82,15 +87,17 @@ export default async function PacienteDetalhePage({ params }: PageProps) {
           </CardContent>
         </Card>
         <div className="space-y-6 lg:col-span-8">
-          <Card>
+          <PatientAnamnesis pacienteId={paciente.id} initialAnswers={anamneses} />
+          <PatientDocuments pacienteId={paciente.id} initialDocuments={documentos} />
+          <Card className="rounded-3xl border border-white/20 bg-white/80 shadow-xl shadow-primary/10 backdrop-blur dark:bg-slate-950/70">
             <CardHeader>
-              <CardTitle>Registro clínico</CardTitle>
+              <CardTitle>Registro clínico contínuo</CardTitle>
             </CardHeader>
             <CardContent>
               <ProntuarioForm pacienteId={paciente.id} consultas={paciente.consultas} />
             </CardContent>
           </Card>
-          <Card>
+          <Card className="rounded-3xl border border-white/20 bg-white/80 shadow-xl shadow-primary/10 backdrop-blur dark:bg-slate-950/70">
             <CardHeader>
               <CardTitle>Histórico de atendimentos</CardTitle>
             </CardHeader>
@@ -99,7 +106,7 @@ export default async function PacienteDetalhePage({ params }: PageProps) {
                 <p className="text-sm text-muted-foreground">Nenhum atendimento registrado.</p>
               ) : (
                 paciente.prontuarios.map((registro) => (
-                  <div key={registro.id} className="rounded-xl border p-4">
+                  <div key={registro.id} className="rounded-2xl border border-white/20 bg-white/70 p-4 shadow-sm dark:bg-slate-900/70">
                     <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
                       <span>{formatDate(registro.createdAt)}</span>
                       <span>{registro.criadoPor?.name}</span>
@@ -149,16 +156,16 @@ export default async function PacienteDetalhePage({ params }: PageProps) {
               )}
             </CardContent>
           </Card>
-          <Card>
+          <Card className="rounded-3xl border border-white/20 bg-white/80 shadow-xl shadow-primary/10 backdrop-blur dark:bg-slate-950/70">
             <CardHeader>
-              <CardTitle>Consultas</CardTitle>
+              <CardTitle>Consultas recentes</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {paciente.consultas.length === 0 ? (
                 <p className="text-sm text-muted-foreground">Nenhuma consulta agendada.</p>
               ) : (
                 paciente.consultas.map((consulta) => (
-                  <div key={consulta.id} className="rounded-xl border p-4">
+                  <div key={consulta.id} className="rounded-2xl border border-white/20 bg-white/70 p-4 shadow-sm dark:bg-slate-900/70">
                     <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
                       <div>
                         <p className="font-medium">{consulta.medico.name}</p>

@@ -12,11 +12,14 @@ interface Params {
 export async function GET(_request: Request, { params }: Params) {
   try {
     await requireAbility('patients.read');
+    // @ts-ignore - novos relacionamentos mapeados no schema Prisma deste projeto
     const paciente = await prisma.paciente.findUnique({
       where: { id: params.id },
       include: {
         consultas: { orderBy: { inicio: 'desc' }, take: 10, include: { medico: true } },
-        prontuarios: { orderBy: { createdAt: 'desc' }, take: 10, include: { criadoPor: true, consulta: true, anexos: true } }
+        prontuarios: { orderBy: { createdAt: 'desc' }, take: 10, include: { criadoPor: true, consulta: true, anexos: true } },
+        documentos: { orderBy: { createdAt: 'desc' } },
+        anamneses: { include: { pergunta: true } }
       }
     });
     if (!paciente) {

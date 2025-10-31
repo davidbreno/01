@@ -20,6 +20,19 @@ enum Status {
   CONCLUIDA
 }
 
+enum DocumentoTipo {
+  RECEITA
+  PRONTUARIO
+  DOCUMENTO_PESSOAL
+  RADIOGRAFIA
+}
+
+enum ImplanteCategoria {
+  CMI
+  HE
+  HI_TAPA
+}
+
 model User {
   id        String    @id @default(cuid())
   name      String
@@ -52,6 +65,8 @@ model Paciente {
   updatedAt    DateTime     @updatedAt
   consultas    Consulta[]
   prontuarios  Prontuario[]
+  documentos   PacienteDocumento[]
+  anamneses    AnamneseResposta[]
 }
 
 model Consulta {
@@ -62,6 +77,9 @@ model Consulta {
   fim        DateTime
   status     Status   @default(AGENDADA)
   notas      String?
+  lembreteAtivo Boolean  @default(false)
+  lembreteAntecedenciaMinutos Int?
+  lembreteEnviadoEm DateTime?
   paciente   Paciente @relation(fields: [pacienteId], references: [id])
   medico     User     @relation("MedicoConsultas", fields: [medicoId], references: [id])
   prontuario Prontuario?
@@ -92,6 +110,70 @@ model Attachment {
   mime         String
   prontuario   Prontuario @relation(fields: [prontuarioId], references: [id])
   createdAt    DateTime   @default(now())
+}
+
+model PacienteDocumento {
+  id          String         @id @default(cuid())
+  pacienteId  String
+  titulo      String
+  tipo        DocumentoTipo
+  arquivoUrl  String
+  arquivoNome String
+  mimeType    String
+  tamanho     Int
+  observacoes String?
+  paciente    Paciente       @relation(fields: [pacienteId], references: [id])
+  createdAt   DateTime       @default(now())
+
+  @@index([pacienteId, tipo])
+}
+
+model AnamnesePergunta {
+  id        String             @id @default(cuid())
+  pergunta  String
+  categoria String?
+  ordem     Int                @default(0)
+  ativo     Boolean            @default(true)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  respostas AnamneseResposta[]
+}
+
+model AnamneseResposta {
+  id          String             @id @default(cuid())
+  pacienteId  String
+  perguntaId  String
+  resposta    String
+  paciente    Paciente           @relation(fields: [pacienteId], references: [id])
+  pergunta    AnamnesePergunta   @relation(fields: [perguntaId], references: [id])
+  createdAt   DateTime           @default(now())
+
+  @@unique([pacienteId, perguntaId])
+  @@index([perguntaId])
+}
+
+model ImplanteEstoqueItem {
+  id         String            @id @default(cuid())
+  categoria  ImplanteCategoria
+  modelo     String
+  tamanho    String
+  marca      String
+  quantidade Int
+  imagemUrl  String?
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+}
+
+model MaterialEstoqueItem {
+  id         String   @id @default(cuid())
+  nome       String
+  categoria  String
+  marca      String?
+  modelo     String?
+  unidade    String?
+  quantidade Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model AuditLog {

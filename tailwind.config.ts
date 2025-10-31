@@ -36,6 +36,12 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))'
         },
+        surface: {
+          50: 'hsl(var(--surface-50))',
+          100: 'hsl(var(--surface-100))',
+          200: 'hsl(var(--surface-200))',
+          300: 'hsl(var(--surface-300))'
+        },
         grayui: {
           50: '#f8fafc',
           100: '#e2e8f0',
@@ -57,7 +63,7 @@ const config: Config = {
         soft: '0 15px 40px rgba(15,61,46,0.15)'
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif']
+        sans: ['var(--font-plus-jakarta)', 'system-ui', 'sans-serif']
       }
     }
   },
