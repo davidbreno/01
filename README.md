@@ -8,9 +8,11 @@ Sistema web completo para gestão de pacientes, agenda médica e prontuários cl
 - Cadastro, edição, busca, filtros, ordenação e arquivamento de pacientes.
 - Agenda de consultas com prevenção de conflitos por médico, visualização em lista e calendário.
 - Prontuário estruturado com anamnese, diagnóstico, prescrição e upload de anexos.
+- Biblioteca clínica de documentos com categorias, filtros por paciente e anexos com preview.
 - Relatórios com contagem de pacientes, consultas por status e por médico.
 - Auditoria completa das operações sensíveis.
 - Interface responsiva com modo claro/escuro, navegação por teclado e feedbacks acessíveis.
+- Painel de configurações com personalização de tema, densidade, animações e modo glass.
 
 ## Requisitos
 - Node.js 18+
@@ -74,3 +76,26 @@ Por padrão os arquivos são gravados em `public/uploads` para uso local. Em pro
 - RBAC implementado em `lib/rbac.ts`.
 - Rotas da API e Server Actions localizadas em `app/api/*`.
 - Schema Prisma em `prisma/schema.prisma`.
+
+## Personalização visual (tema Dr. David)
+
+Há duas formas de ajustar a identidade do projeto:
+
+1. **Ajustes sem código** — acesse o menu “Configurações” na aplicação (`/configuracoes`). Lá você encontra:
+   - Seleção de tema claro, escuro ou automático.
+   - Paleta de destaques (`Oceano`, `Violeta`, `Amanhecer`) com pré-visualização.
+   - Densidade confortável/compacta, redução de animações e modo glass (transparências).
+   As preferências ficam salvas no navegador e podem ser restauradas com um clique.
+
+2. **Customização via código** — os arquivos a seguir concentram todos os pontos de cor e estilo:
+
+   | Área | Arquivo | O que alterar |
+   | --- | --- | --- |
+   | Paleta global | `app/globals.css` (`:root`, `.dark` e blocos `body[data-brand=...]`) | Variáveis `--primary`, `--accent`, `--surface-*`, além das regras de densidade/animações. |
+   | Gradientes de fundo | `app/globals.css` (seção `body { background-image: ... }`) | Ajuste os gradientes `radial-gradient` e `linear-gradient` para mudar a atmosfera do dashboard. |
+   | Sidebar e cabeçalho | `components/layout/app-shell.tsx` | Classes `bg-gradient-to-*`, `bg-primary/*`, `shadow-primary/*` e `border-white/..` definem cores da navegação. |
+   | Tela de login | `app/(auth)/login/page.tsx` | Gradientes `bg-gradient-to-br`, contêineres `bg-white/60`, `bg-primary/15` e animações `animate-float*`. |
+   | Dashboard e listagens | `components/consultas/consultation-table.tsx`, `components/documentos/document-workspace.tsx`, `app/(dashboard)/pacientes/[id]/page.tsx`, `app/estoque/page.tsx` | Cards com classes `bg-white/XX`, `dark:bg-slate-9XX`, `border-white/YY` e `shadow-primary/ZZ`. |
+   | Uploads e formulários | `components/pacientes/patient-documents.tsx`, `components/pacientes/patient-anamnesis.tsx` | Personalize campos e botões (`bg-gradient-to-r`, `border-primary/..`, `text-primary`). |
+
+Após qualquer alteração salve os arquivos e rode `pnpm dev` para validar visualmente.

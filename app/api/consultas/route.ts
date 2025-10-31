@@ -71,8 +71,16 @@ export async function POST(request: Request) {
     const session = await requireAbility('consultas.write');
     const payload = consultaSchema.parse(await request.json());
     await assertNoConflict(payload.medicoId, payload.inicio, payload.fim);
+    const data: any = {
+      ...payload,
+      lembreteAtivo: !!payload.lembreteAtivo,
+      lembreteAntecedenciaMinutos: payload.lembreteAtivo
+        ? payload.lembreteAntecedenciaMinutos ?? 30
+        : null,
+      lembreteEnviadoEm: null
+    };
     const consulta = await prisma.consulta.create({
-      data: payload,
+      data,
       include: { paciente: true, medico: true }
     });
     await writeAuditLog({

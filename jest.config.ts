@@ -6,7 +6,8 @@ const config: Config = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
-    '^uuid$': require.resolve('uuid')
+    '^uuid$': require.resolve('uuid'),
+    '^@prisma/client$': '<rootDir>/__mocks__/@prisma/client.ts'
   },
   testPathIgnorePatterns: ['<rootDir>/tests/e2e/', '<rootDir>/tests/integration/'],
   transform: {

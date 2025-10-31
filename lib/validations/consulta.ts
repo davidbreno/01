@@ -13,7 +13,15 @@ export const consultaSchema = z
     inicio: z.coerce.date(),
     fim: z.coerce.date(),
     status: z.nativeEnum(Status).default(Status.AGENDADA),
-    notas: notasField
+    notas: notasField,
+    lembreteAtivo: z.boolean().default(false),
+    lembreteAntecedenciaMinutos: z
+      .number()
+      .int()
+      .min(5, 'Informe um lembrete a partir de 5 minutos')
+      .max(2880, 'Lembrete pode ter no máximo 48 horas')
+      .optional()
+      .nullable()
   })
   .refine((data) => data.fim > data.inicio, { message: horarioMessage, path: ['fim'] });
 
@@ -31,13 +39,27 @@ export const consultaFormSchema = z
     inicio: z.string().min(1),
     fim: z.string().min(1),
     status: z.enum(statusValues),
-    notas: notasField
+    notas: notasField,
+    lembreteAtivo: z.boolean().optional(),
+    lembreteAntecedenciaMinutos: z.string().optional().nullable()
   })
   .refine((data) => {
     const inicio = new Date(data.inicio);
     const fim = new Date(data.fim);
     return !Number.isNaN(inicio.valueOf()) && !Number.isNaN(fim.valueOf()) && fim > inicio;
-  }, { message: horarioMessage, path: ['fim'] });
+  }, { message: horarioMessage, path: ['fim'] })
+  .superRefine((data, ctx) => {
+    if (data.lembreteAtivo) {
+      const parsed = Number(data.lembreteAntecedenciaMinutos ?? '');
+      if (!parsed || Number.isNaN(parsed) || parsed < 5 || parsed > 2880) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Informe um lembrete entre 5 e 2880 minutos',
+          path: ['lembreteAntecedenciaMinutos']
+        });
+      }
+    }
+  });
 
 export type ConsultaFormValues = z.infer<typeof consultaFormSchema>;
 
