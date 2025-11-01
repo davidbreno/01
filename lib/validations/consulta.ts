@@ -13,7 +13,12 @@ export const consultaSchema = z
     inicio: z.coerce.date(),
     fim: z.coerce.date(),
     status: z.nativeEnum(Status).default(Status.AGENDADA),
-    notas: notasField
+    notas: notasField,
+    lembreteAgendado: z
+      .union([z.coerce.date(), z.null()])
+      .optional()
+      .transform((value) => (value instanceof Date ? value : null)),
+    lembreteEnviado: z.boolean().optional()
   })
   .refine((data) => data.fim > data.inicio, { message: horarioMessage, path: ['fim'] });
 
@@ -31,7 +36,9 @@ export const consultaFormSchema = z
     inicio: z.string().min(1),
     fim: z.string().min(1),
     status: z.enum(statusValues),
-    notas: notasField
+    notas: notasField,
+    lembreteAgendado: z.string().optional().nullable(),
+    lembreteEnviado: z.boolean().optional()
   })
   .refine((data) => {
     const inicio = new Date(data.inicio);

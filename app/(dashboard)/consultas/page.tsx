@@ -1,5 +1,5 @@
-import { ConsultationTable } from '@/components/consultas/consultation-table';
+import { redirect } from 'next/navigation';
 
 export default function ConsultasPage() {
-  return <ConsultationTable />;
+  redirect('/agenda');
 }

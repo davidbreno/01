@@ -19,7 +19,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
     "prisma:seed": "ts-node prisma/seed.ts",
-    "verify": "pnpm lint && pnpm test && pnpm e2e -- --config=playwright.config.ts --headed=false --grep @smoke"
+    "verify": "pnpm lint && pnpm test && pnpm e2e -- --config=playwright.config.ts --headed=false --grep @smoke",
+    "check": "pnpm lint && pnpm test"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",

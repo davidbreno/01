@@ -1,6 +1,6 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
 import { consultaFormSchema, ConsultaFormValues } from '@/lib/validations/consulta';
@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 
 type ConsultaStatus = ConsultaFormValues['status'];
 
@@ -41,6 +42,7 @@ export function ConsultationForm({
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors }
   } = useForm<FormValues>({
     resolver: zodResolver(consultaFormSchema),
@@ -50,7 +52,11 @@ export function ConsultationForm({
       inicio: defaultValues?.inicio ? new Date(defaultValues.inicio).toISOString().slice(0, 16) : '',
       fim: defaultValues?.fim ? new Date(defaultValues.fim).toISOString().slice(0, 16) : '',
       status: (defaultValues?.status as ConsultaStatus) ?? 'AGENDADA',
-      notas: defaultValues?.notas ?? ''
+      notas: defaultValues?.notas ?? '',
+      lembreteAgendado: defaultValues?.lembreteAgendado
+        ? new Date(defaultValues.lembreteAgendado).toISOString().slice(0, 16)
+        : '',
+      lembreteEnviado: defaultValues?.lembreteEnviado ?? false
     }
   });
 
@@ -117,6 +123,30 @@ export function ConsultationForm({
       <div className="space-y-2">
         <Label htmlFor="notas">Notas</Label>
         <Textarea id="notas" rows={4} {...register('notas')} placeholder="Informações adicionais" />
+      </div>
+      <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
+        <div className="space-y-2">
+          <Label htmlFor="lembreteAgendado">Agendar lembrete</Label>
+          <Input id="lembreteAgendado" type="datetime-local" {...register('lembreteAgendado')} />
+          {errors.lembreteAgendado ? (
+            <p className="text-xs text-destructive">{errors.lembreteAgendado.message as string}</p>
+          ) : null}
+        </div>
+        <Controller
+          control={control}
+          name="lembreteEnviado"
+          render={({ field }) => (
+            <label className="flex items-center justify-between gap-3 rounded-xl border px-4 py-3 text-sm">
+              <div>
+                <span className="font-medium">Confirmar envio automático</span>
+                <p className="text-xs text-muted-foreground">
+                  Envia aviso por e-mail para o paciente na data selecionada.
+                </p>
+              </div>
+              <Switch checked={field.value ?? false} onCheckedChange={field.onChange} />
+            </label>
+          )}
+        />
       </div>
       <Button type="submit" className="w-full" disabled={submitting}>
         {submitting ? (

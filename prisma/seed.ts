@@ -1,5 +1,5 @@
 require('dotenv/config');
-const { PrismaClient, Role, Status } = require('@prisma/client');
+const { PrismaClient, Role, Status, ImplantCategory, DocumentType } = require('@prisma/client');
 const { hash } = require('bcryptjs');
 
 const prisma = new PrismaClient();
@@ -139,6 +139,83 @@ async function main() {
         observacoes: 'Reavaliar em 30 dias.'
       }
     }
+  });
+
+  const perguntas = [
+    { pergunta: 'Sente dor ou sensibilidade em algum dente atualmente?', categoria: 'Sintomas' },
+    { pergunta: 'Realizou cirurgias recentes ou tratamentos médicos em andamento?', categoria: 'Histórico' },
+    { pergunta: 'Utiliza algum medicamento contínuo?', categoria: 'Histórico' },
+    { pergunta: 'Apresenta alergia a algum medicamento ou material odontológico?', categoria: 'Alergias' },
+    { pergunta: 'Há histórico de doenças sistêmicas (diabetes, cardiopatias)?', categoria: 'Condições sistêmicas' }
+  ];
+
+  await prisma.anamneseQuestion.createMany({ data: perguntas });
+
+  await prisma.implantItem.createMany({
+    data: [
+      {
+        nome: 'Implante Prime 3.5',
+        categoria: ImplantCategory.CMI,
+        modelo: 'Prime',
+        tamanho: '3.5 x 11.5 mm',
+        marca: 'Neodent',
+        quantidade: 8,
+        descricao: 'Implante cônico com conexão Cone Morse.'
+      },
+      {
+        nome: 'Implante Drive HE 4.0',
+        categoria: ImplantCategory.HE,
+        modelo: 'Drive',
+        tamanho: '4.0 x 10 mm',
+        marca: 'S.I.N',
+        quantidade: 12,
+        descricao: 'Indicado para regiões posteriores com alto torque.'
+      },
+      {
+        nome: 'Implante HI TAPA 3.75',
+        categoria: ImplantCategory.HI_TAPA,
+        modelo: 'HI Tapa',
+        tamanho: '3.75 x 11 mm',
+        marca: 'ImplantDirect',
+        quantidade: 6,
+        descricao: 'Acabamento anodizado para gengiva delicada.'
+      }
+    ]
+  });
+
+  await prisma.materialItem.createMany({
+    data: [
+      { nome: 'Anestésico Articaína 4%', marca: 'DFL', unidade: 'tubetes', quantidade: 48 },
+      { nome: 'Luvas de Procedimento M', marca: 'Supermax', unidade: 'caixas', quantidade: 10 },
+      { nome: 'Resina Filtek Z350 XT A2', marca: '3M', unidade: 'seringas', quantidade: 5 }
+    ]
+  });
+
+  await prisma.documentRecord.createMany({
+    data: [
+      {
+        titulo: 'Receita antibiótico Paciente 1',
+        tipo: DocumentType.RECEITA,
+        arquivoUrl: '/uploads/exemplo-receita.pdf',
+        arquivoMime: 'application/pdf',
+        pacienteId: pacientes[0].id,
+        notas: 'Administrar de 8 em 8 horas por 7 dias.'
+      },
+      {
+        titulo: 'Radiografia panorâmica Paciente 2',
+        tipo: DocumentType.RADIOGRAFIA,
+        arquivoUrl: '/uploads/exemplo-rx.jpg',
+        arquivoMime: 'image/jpeg',
+        pacienteId: pacientes[1].id,
+        notas: 'Avaliar reabsorção óssea.'
+      },
+      {
+        titulo: 'Política LGPD da clínica',
+        tipo: DocumentType.DOCUMENTO_PESSOAL,
+        arquivoUrl: '/uploads/politica-lgpd.pdf',
+        arquivoMime: 'application/pdf'
+      }
+    ]
   });
 
   console.log('Seed concluido com usuarios padrao:');

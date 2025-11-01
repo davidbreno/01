@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
-import { requireAbility } from '@/lib/auth-helpers';
+import { requireAnyAbility } from '@/lib/auth-helpers';
 
 export async function POST(request: Request) {
   try {
-    await requireAbility('prontuario.write');
+    await requireAnyAbility(['prontuario.write', 'documentos.write', 'estoque.write']);
     const formData = await request.formData();
     const file = formData.get('file');
     if (!file || typeof file === 'string') {

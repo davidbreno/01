@@ -8,17 +8,24 @@ import { AuthProvider } from '@/providers/auth-provider';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'Clínica Prisma — Controle de Pacientes',
+  title: 'Plataforma Dr. David — Odontologia Integrada',
   description:
-    'Sistema completo de controle de pacientes, agendas e prontuários para clínicas modernas.',
-  metadataBase: new URL('https://controle-pacientes.local')
+    'Dashboard inteligente para gestão de pacientes, agenda, estoque e documentos da clínica Dr. David.',
+  metadataBase: new URL('https://plataforma-drdavid.local'),
+  openGraph: {
+    title: 'Plataforma Dr. David',
+    description:
+      'Gestão odontológica com dashboards modernos, agenda sincronizada e armazenamento seguro de documentos.',
+    siteName: 'Plataforma Dr. David',
+    type: 'website'
+  }
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <body className={cn(inter.variable, 'min-h-screen bg-background font-sans antialiased')}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem storageKey="clinica-prisma-theme">
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem storageKey="plataforma-drdavid-theme">
           <AuthProvider>{children}</AuthProvider>
         </ThemeProvider>
       </body>

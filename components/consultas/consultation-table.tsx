@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, MoreHorizontal } from 'lucide-react';
+import { Plus, MoreHorizontal, Bell, BellOff, BellRing } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -13,6 +13,7 @@ import { Alert } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DayPicker } from 'react-day-picker';
 import { formatDate } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 type ConsultaStatus = 'AGENDADA' | 'CONFIRMADA' | 'CANCELADA' | 'CONCLUIDA';
 const CONSULTA_STATUSES: ConsultaStatus[] = ['AGENDADA', 'CONFIRMADA', 'CANCELADA', 'CONCLUIDA'];
@@ -31,6 +32,8 @@ interface Consulta {
   fim: string;
   status: ConsultaStatus;
   notas?: string | null;
+  lembreteAgendado?: string | null;
+  lembreteEnviado?: boolean;
 }
 
 interface PaginatedConsultas {
@@ -72,7 +75,11 @@ async function fetchDoctorsOptions(): Promise<Option[]> {
   return data.map((medico: any) => ({ id: medico.id, label: medico.name }));
 }
 
-export function ConsultationTable() {
+interface ConsultationTableProps {
+  variant?: 'default' | 'agenda';
+}
+
+export function ConsultationTable({ variant = 'default' }: ConsultationTableProps) {
   const [page, setPage] = useState(1);
   const [statusFilter, setConsultaStatusFilter] = useState<ConsultaStatus | undefined>(undefined);
   const [tab, setTab] = useState('lista');
@@ -151,8 +158,12 @@ export function ConsultationTable() {
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
         <div>
-          <h1 className="text-2xl font-semibold">Consultas</h1>
-          <p className="text-sm text-muted-foreground">Acompanhe agenda, status e histórico de atendimentos.</p>
+          <h1 className="text-2xl font-semibold">{variant === 'agenda' ? 'Agenda inteligente' : 'Consultas'}</h1>
+          <p className="text-sm text-muted-foreground">
+            {variant === 'agenda'
+              ? 'Sincronize horários, lembretes e mantenha a equipe alinhada com o paciente.'
+              : 'Acompanhe agenda, status e histórico de atendimentos.'}
+          </p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={(open) => (open ? setDialogOpen(true) : closeDialog())}>
           <DialogTrigger asChild>
@@ -176,7 +187,11 @@ export function ConsultationTable() {
                     ...values,
                     inicio: new Date(values.inicio).toISOString(),
                     fim: new Date(values.fim).toISOString(),
-                    notas: values.notas || null
+                    notas: values.notas || null,
+                    lembreteAgendado: values.lembreteAgendado
+                      ? new Date(values.lembreteAgendado).toISOString()
+                      : null,
+                    lembreteEnviado: values.lembreteEnviado ?? false
                   },
                   editing?.id
                 );
@@ -232,6 +247,7 @@ export function ConsultationTable() {
                     <TableHead>Início</TableHead>
                     <TableHead>Fim</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Lembrete</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -240,9 +256,27 @@ export function ConsultationTable() {
                     <TableRow key={consulta.id}>
                       <TableCell className="font-medium">{consulta.paciente.nome}</TableCell>
                       <TableCell>{consulta.medico.name}</TableCell>
-                      <TableCell>{new Date(consulta.inicio).toLocaleString('pt-BR')}</TableCell>
-                      <TableCell>{new Date(consulta.fim).toLocaleString('pt-BR')}</TableCell>
-                      <TableCell>{STATUS_LABELS[consulta.status]}</TableCell>
+                      <TableCell>{formatDate(consulta.inicio)}</TableCell>
+                      <TableCell>{formatDate(consulta.fim)}</TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="text-xs">
+                          {STATUS_LABELS[consulta.status]}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-1 text-xs">
+                          {consulta.lembreteAgendado ? (
+                            <span className="flex items-center gap-1 text-muted-foreground">
+                              {consulta.lembreteEnviado ? <BellRing className="h-3 w-3" /> : <Bell className="h-3 w-3" />}
+                              {formatDate(consulta.lembreteAgendado)}
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-1 text-muted-foreground">
+                              <BellOff className="h-3 w-3" /> Sem lembrete
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -258,6 +292,25 @@ export function ConsultationTable() {
                               }}
                             >
                               Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={async () => {
+                                await upsertConsulta(
+                                  {
+                                    pacienteId: consulta.paciente.id,
+                                    medicoId: consulta.medico.id,
+                                    inicio: consulta.inicio,
+                                    fim: consulta.fim,
+                                    status: consulta.status,
+                                    notas: consulta.notas ?? null,
+                                    lembreteAgendado: consulta.lembreteAgendado,
+                                    lembreteEnviado: !consulta.lembreteEnviado
+                                  },
+                                  consulta.id
+                                );
+                              }}
+                            >
+                              {consulta.lembreteEnviado ? 'Marcar lembrete pendente' : 'Confirmar envio do lembrete'}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               className="text-destructive"
